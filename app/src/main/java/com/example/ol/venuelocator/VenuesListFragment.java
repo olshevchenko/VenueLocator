@@ -16,7 +16,7 @@ import com.example.ol.venuelocator.venues.VenuesHelper;
 /**
  * A fragment representing a list of Venues found.
  */
-public class VenuesListFragment extends Fragment {
+public class VenuesListFragment extends Fragment implements Logic.onPlacesRefreshHeadersProcessor {
   //for logging
   private static final String LOG_TAG = VenuesListFragment.class.getName();
 
@@ -25,7 +25,7 @@ public class VenuesListFragment extends Fragment {
   }
 
   private MainActivity mActivity;
-  private VenuesListAdapter mVenuesListAdapter;
+  private VenuesListAdapter mVenuesListAdapter = null;
   private ListView mLVVenuesList = null;
 
   private VenuesHelper mVHelper;
@@ -87,5 +87,14 @@ public class VenuesListFragment extends Fragment {
   public void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     outState.putInt(Constants.VenueClickParams.VENUE_CLICKED_NUMBER, mVenueClickedNumber);
+  }
+
+  @Override
+  public void placesRefreshHeaders() {
+    Log.i(LOG_TAG, "placesRefreshHeaders()");
+
+    mVHelper.getVenueList().remove(0);
+    if (null != mVenuesListAdapter)
+      mVenuesListAdapter.notifyDataSetChanged();
   }
 }

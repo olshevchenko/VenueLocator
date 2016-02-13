@@ -1,5 +1,7 @@
 package com.example.ol.venuelocator;
 
+import com.example.ol.venuelocator.http.FoursquareClient;
+import com.example.ol.venuelocator.venues.Venue;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -12,15 +14,32 @@ import android.widget.Button;
 
 import com.example.ol.venuelocator.venues.VenuesHelper;
 
+import java.util.List;
+
 
 public class MainActivity extends FragmentActivity implements
-    VenuesListFragment.onVenueClickListener, OnMapReadyCallback, View.OnClickListener {
+    VenuesListFragment.onVenueClickListener,
+    Logic.onPlacesUpdateProcessor,
+    OnMapReadyCallback,
+    View.OnClickListener {
   //for logging
   private static final String LOG_TAG = MainActivity.class.getName();
 
-  ///map instance & pure interface reference on it
+///ToDo REMOVE it!
+  private static double ltt = Constants.Locations.VAL1_LATT;
+  private static double lng = Constants.Locations.VAL1_LONG;
+
+
+  /// VenuesListFragment reference & pure interface reference on VenuesListFragment
+  private Logic.onPlacesRefreshHeadersProcessor mPlacesRefreshHeadersProcessor = null;
+
+  /// map instance & pure interface reference on it
   private Map mMap = null;
-  private Logic.onPlacesMarkProcessor mPlacesMarkProcessor;
+  private Logic.onPlacesMarkProcessor mPlacesMarkProcessor = null;
+
+  /// Foursquare client instance & pure interface reference on it
+  private FoursquareClient mHttpClient = null;
+  private Logic.onPlacesSearchProcessor mPlacesSearchProcessor = null;
 
   private ProgressDialog mPleaseWaitDialog;
   private Button mBtLoc1, mBtLoc2;
@@ -47,6 +66,10 @@ public class MainActivity extends FragmentActivity implements
     GlobalStorage globalStorage = (GlobalStorage)getApplicationContext();
     mVHelper = globalStorage.getVHelper();
 
+    ///get interface reference on the VenuesListFragment
+    mPlacesRefreshHeadersProcessor = (VenuesListFragment) getSupportFragmentManager()
+        .findFragmentById(R.id.frVenuesList);
+
     ///get a Google map instance
     SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
         .findFragmentById(R.id.fragment_map);
@@ -66,32 +89,59 @@ public class MainActivity extends FragmentActivity implements
   }
 
   @Override
+  public void onMapReady(GoogleMap googleMap) {
+    mPleaseWaitDialog.dismiss();
+
+    mMap = new Map(googleMap); /// init & tune our map instance from the Google one
+    mPlacesMarkProcessor = mMap;
+
+    mHttpClient = new FoursquareClient(this); /// init & tune Foursquare HTTP instance
+    mPlacesSearchProcessor = mHttpClient;
+
+    /// asynchronously call (Foursquare) venues search for current location
+/// ToDo Use CURRENT loc.!
+    mPlacesSearchProcessor.placesSearch(new Venue(Constants.Locations.VAL1_LATT, Constants.Locations.VAL1_LONG));
+  }
+
+  /**
+   * ToDo describe it!
+   * @param newList - list of updated venues
+   */
+  @Override
+  public void placesUpdate(List<Venue> newList) {
+    mVHelper.setVenueList(newList);
+    if (null != mPlacesRefreshHeadersProcessor)
+      mPlacesRefreshHeadersProcessor.placesRefreshHeaders();
+    if (null != mPlacesMarkProcessor)
+      mPlacesMarkProcessor.placesShow(mVHelper.getVenueList());
+  }
+
+  /**
+   * Either start new activity for venue details show or select venue mark on the map
+   * @param position - number of item in the list
+   * @param isDetailClick - what exactly has been clicked - the hole item (for selection)
+   *                      or the details button
+   */
+  @Override
   public void venueClick(int position, boolean isDetailClick) {
     mVenueClickedNumber = position;
     mIsVenueClicked4Details = isDetailClick;
-    if (true == isDetailClick)
+    if (isDetailClick)
       showVenueDetail(position);
     else
-      selectVenueOnTheMap(position);
-  }
-
-  @Override
-  public void onMapReady(GoogleMap googleMap) {
-    mPleaseWaitDialog.dismiss();
-    mMap = new Map(googleMap); ///init & tune our map instance from the Google one
-    mPlacesMarkProcessor = mMap;
-    showVenuesOnTheMap(); ///immediately show existed (may be empty) venues list on the map just created
+      mPlacesMarkProcessor.placeSelect(position, mVHelper.getVenue(position));
   }
 
 
   @Override
   public void onClick(View v) {
+
     switch (v.getId()) {
       case R.id.bt1:
       case R.id.bt2:
-//        mVHelper.refreshVenueList();
-//        venuesListAdapter.notifyDataSetChanged();
-//        showVenuesOnTheMap();
+        ltt += 0.001;
+        lng -= 0.0005;
+        mPlacesSearchProcessor.placesSearch(new Venue(ltt, lng));
         break;
       default:
         break;
@@ -103,11 +153,4 @@ public class MainActivity extends FragmentActivity implements
         putExtra(Constants.VenueClickParams.VENUE_CLICKED_NUMBER, number));
   }
 
-  void showVenuesOnTheMap() {
-    mPlacesMarkProcessor.placesShow(mVHelper.getVenueList());
-  }
-
-  void selectVenueOnTheMap(int number) {
-    mPlacesMarkProcessor.placeSelect(number, mVHelper.getVenue(number));
-  }
 }

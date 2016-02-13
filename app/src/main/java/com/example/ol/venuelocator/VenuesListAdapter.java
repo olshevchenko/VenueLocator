@@ -9,7 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.example.ol.venuelocator.model.Venue;
+import com.example.ol.venuelocator.venues.Venue;
 
 import java.util.List;
 
@@ -73,15 +73,6 @@ public class VenuesListAdapter extends ArrayAdapter<Venue> {
           mListener.venueClick((Integer) v.getTag(), true);
       }
     });
-/*
-    rowView.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        if(mListener != null)
-          mListener.venueClick((Integer) v.getTag(), true);
-      }
-    });
-*/
     return rowView;
   }
 }

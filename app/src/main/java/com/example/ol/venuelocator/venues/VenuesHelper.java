@@ -1,7 +1,5 @@
 package com.example.ol.venuelocator.venues;
 
-import com.example.ol.venuelocator.model.Venue;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +31,9 @@ public class VenuesHelper {
   }
 
   public void setVenueList(List<Venue> venueList) {
-    this.venueList = venueList;
+///    this.venueList = venueList; /// not suitable way for further list notifyDataSetChanged()
+    this.venueList.clear();
+    this.venueList.addAll(venueList);
   }
 
   public Venue getVenue(int number) throws IndexOutOfBoundsException {

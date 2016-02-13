@@ -3,8 +3,7 @@ package com.example.ol.venuelocator;
 
 import android.util.Log;
 
-import com.example.ol.venuelocator.model.Place;
-import com.example.ol.venuelocator.model.Venue;
+import com.example.ol.venuelocator.venues.Venue;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -22,7 +21,7 @@ public class Map implements Logic.onPlacesMarkProcessor {
   private static final String LOG_TAG = Map.class.getName();
 
   private GoogleMap mGoogleMap;
-  private List<Marker> mMarkersList = new ArrayList<Marker>(); ///markers made storage for further selective removal
+  private List<Marker> mMarkersList = new ArrayList<>(); ///markers made storage for further selective removal
   Marker mSelected = null; ///marker made SELECTED
 
   public Map(GoogleMap map) {

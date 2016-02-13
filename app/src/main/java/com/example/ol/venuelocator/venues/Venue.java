@@ -1,11 +1,16 @@
-package com.example.ol.venuelocator.model;
+package com.example.ol.venuelocator.venues;
 
-import android.location.Location;
+import com.example.ol.venuelocator.Constants;
+import com.example.ol.venuelocator.http.dto.CategoryDto;
+import com.example.ol.venuelocator.http.dto.LocationDto;
+import com.example.ol.venuelocator.http.dto.VenueDto;
+
+import java.util.List;
 
 /**
  * Created by ol on 03.02.16.
  */
-public class Venue extends Place {
+public class Venue {
   //for logging
   private static final String LOG_TAG = Venue.class.getName();
 
@@ -13,21 +18,8 @@ public class Venue extends Place {
   private VenueDetails details;
   private VenueLocation location;
 
-  /**
-   * makes String param copy if the linked reference String value is undefined
-   *
-   * @param param - constructor parameter outer value
-   * @param refer - reference to the linked value
-   * @return - parameter COPY or just refererce to the existed value
-   */
-  private String makeParamCopyIfReferenceEmpty(String param, String refer) {
-    if ((null == refer) || (true == refer.isEmpty()))
-      return new String(param); ///return the param copy
-    else
-      return refer; ///return the valuable reference
-  }
 
-  public class VenueHeader extends PlaceHeader {
+  public class VenueHeader {
     private String name = ""; ///reference to the one from VenueDetails
     private String primCategoryName = ""; ///...
     private int distance = -1;
@@ -56,7 +48,7 @@ public class Venue extends Place {
     }
   }
 
-  public class VenueDetails extends PlaceDetails {
+  public class VenueDetails {
     private String name = ""; ///reference to the one from VenueHeader
     private String primCategoryName = ""; ///...
     private String city = "";
@@ -91,7 +83,7 @@ public class Venue extends Place {
     }
   }
 
-  public class VenueLocation extends PlaceLocation {
+  public class VenueLocation {
     private double ltt = 0.0d;
     private double lng = 0.0d;
 
@@ -111,17 +103,14 @@ public class Venue extends Place {
     }
   }
 
-  @Override
   public VenueHeader getHeader() {
     return header;
   }
 
-  @Override
   public VenueDetails getDetails() {
     return details;
   }
 
-  @Override
   public VenueLocation getLocation() {
     return location;
   }
@@ -132,17 +121,50 @@ public class Venue extends Place {
     this.location = new VenueLocation();
   }
 
-  private String name = ""; ///reference to the one from VenueDetails
-  private String primCategoryName = ""; ///...
-  private int distance = -1;
-  private String city = "";
-  private String address = ""; ///Hm... ask for "street" here...
-  private double ltt = 0.0d;
-  private double lng = 0.0d;
+  public Venue(double ltt, double lng) {
+    this.header = new VenueHeader();
+    this.details = new VenueDetails();
+    this.location = new VenueLocation(ltt, lng);
+  }
 
-  public Venue(String name, String primCategoryName, String address, String city, double ltt, double lng, int distance) {
+  public Venue(String name, String primCategoryName, String address, String city,
+               double ltt, double lng, int distance) {
     this.header = new VenueHeader(name, primCategoryName, distance);
     this.details = new VenueDetails(name, primCategoryName, city, address);
     this.location = new VenueLocation(ltt, lng);
+  }
+
+  /// converter constructor DTO => model data type
+  public Venue(VenueDto dto) throws IllegalArgumentException {
+    LocationDto dtoLocation = dto.getLocation();
+    double ltt = dtoLocation.getLtt();
+    double lng = dtoLocation.getLng();
+
+    /// skip the venue all with incorrect coordinates
+    if ((ltt < -180) || (ltt > 180))
+      throw new IllegalArgumentException(Constants.Locations.ILLEGAL_LL_LAT_VALUE + ltt);
+    if ((lng < -180) || (lng > 180))
+      throw new IllegalArgumentException(Constants.Locations.ILLEGAL_LL_LNG_VALUE + lng);
+
+    this.location = new VenueLocation(ltt, lng);
+
+    int distance = dtoLocation.getDistance();
+    String primCategoryName = "";
+    List<CategoryDto> dtoCategories = dto.getCategories();
+    if (null != dtoCategories)
+      if (! dtoCategories.isEmpty()) {
+        CategoryDto dtoCategory0 = dtoCategories.get(0);
+        if (dtoCategory0.isPrimary()) {
+          primCategoryName = dtoCategory0.getName();
+        }
+      }
+
+    String name = dto.getName();
+    this.header = new VenueHeader((null!= name)?name:"", primCategoryName, distance);
+
+    String city = dtoLocation.getCity();
+    String address = dtoLocation.getAddress();
+    this.details = new VenueDetails(name, primCategoryName,
+        (null!= city)?city:"", (null!= address)?address:"");
   }
 }

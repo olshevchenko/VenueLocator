@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
-import com.example.ol.venuelocator.model.Venue;
+import com.example.ol.venuelocator.venues.Venue;
 import com.example.ol.venuelocator.venues.VenuesHelper;
 
 public class DetailsActivity extends AppCompatActivity {
@@ -14,7 +14,7 @@ public class DetailsActivity extends AppCompatActivity {
 
   private TextView tvName, tvCategory, tvAddressCity, tvAddress;
   private int venueNumber = 0;
-  private VenuesHelper vHelper;
+  private VenuesHelper mVHelper;
   private Venue venue;
 
   @Override
@@ -32,7 +32,7 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     GlobalStorage globalStorage = (GlobalStorage)getApplicationContext();
-    vHelper = globalStorage.getVHelper();
+    mVHelper = globalStorage.getVHelper();
 
     tvName = (TextView) findViewById(R.id.tvDetailName);
     tvCategory = (TextView) findViewById(R.id.tvDetailCategory);
@@ -40,7 +40,7 @@ public class DetailsActivity extends AppCompatActivity {
     tvAddress = (TextView) findViewById(R.id.tvDetailAddress);
 
     try {
-      venue = vHelper.getVenue(venueNumber);
+      venue = mVHelper.getVenue(venueNumber);
     } catch (IndexOutOfBoundsException ex) {
       Log.e(LOG_TAG, "OUTOFBOUNDS venue number got through intent parameter - finish activity");
       finish();

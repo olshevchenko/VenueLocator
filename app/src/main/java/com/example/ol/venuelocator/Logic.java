@@ -1,7 +1,6 @@
 package com.example.ol.venuelocator;
 
-import com.example.ol.venuelocator.model.Place;
-import com.example.ol.venuelocator.model.Venue;
+import com.example.ol.venuelocator.venues.Venue;
 
 import java.util.List;
 
@@ -14,7 +13,7 @@ public class Logic {
    * abstract interface to search places nearest for the given one
    */
   public interface onPlacesSearchProcessor {
-    List<Place> placesSearch(Place currPosition);
+    void placesSearch(Venue currPosition);
   }
 
   /**
@@ -23,6 +22,20 @@ public class Logic {
   public interface onPlacesMarkProcessor {
     boolean placesShow(List<Venue> venues2ShowList);
     boolean placeSelect(int position, Venue venue2Select);
+  }
+
+  /**
+   * abstract interface to complete places list update processing
+   */
+  public interface onPlacesUpdateProcessor {
+    void placesUpdate(List<Venue> newList);
+  }
+
+  /**
+   * abstract interface to (someway) refresh places headers list
+   */
+  public interface onPlacesRefreshHeadersProcessor {
+    void placesRefreshHeaders(); /// a sign for refresh header list view
   }
 }
 
