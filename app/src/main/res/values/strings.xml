@@ -19,6 +19,7 @@
     <!-- Venues list -->
     <string name="tvVenuesListHeader">Venues close to You:</string>
     <string name="tvVenuesListEmpty">Sorry, there are No venues. Keep moving..</string>
+    <string name="dlgGettingVenuesList">Updating venues list...</string>
 
     <!-- Detail information fields -->
     <string name="tvDetailTabHeader">Venue details</string>
@@ -28,24 +29,7 @@
     <string name="tvDetailAddressLabel">Address</string>
     <string name="tvDetailAddressCrossStreetLabel">CrossStreet</string>
 
-    <!-- TODO: Remove this string arrays -->
-    <string-array name="Venues">
-        <item>Venue 1</item>
-        <item>Venue 2</item>
-        <item>Venue 3</item>
-        <item>Venue 4</item>
-        <item>Venue 5</item>
-        <item>Venue 6</item>
-        <item>Venue 7</item>
-        <item>Venue 8</item>
-        <item>Venue 9</item>
-        <item>Venue 10</item>
-        <item>Venue 11</item>
-        <item>Venue 12</item>
-    </string-array>
-
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- Data -->
 </resources>
 
 
