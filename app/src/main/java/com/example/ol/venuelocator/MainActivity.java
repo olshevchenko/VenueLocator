@@ -8,8 +8,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
@@ -17,9 +20,10 @@ import com.example.ol.venuelocator.venues.VenuesHelper;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
+import java.util.Locale;
 
 
-public class MainActivity extends FragmentActivity implements
+public class MainActivity extends AppCompatActivity implements
     VenuesListFragment.onVenueClickListener,
     Logic.onPlacesUpdateProcessor,
     Logic.onLocationUpdateProcessor,
@@ -43,6 +47,8 @@ public class MainActivity extends FragmentActivity implements
   private Logic.onPlacesSearchProcessor mPlacesSearchProcessor = null;
 
   private ProgressDialog mPleaseWaitDialog;
+  private ActionBar mActionBar;
+
   ///ToDo REMOVE it after debug!
   private Button mBtLoc1;
 
@@ -60,6 +66,12 @@ public class MainActivity extends FragmentActivity implements
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    /// check for exit return from child Details activity
+    if (getIntent().getBooleanExtra("EXIT", false)) {
+      finish();
+    }
+
     setContentView(R.layout.activity_main);
     if (savedInstanceState != null) {
       mVenueClickedNumber = savedInstanceState.getInt(Constants.VenueClickParams.VENUE_CLICKED_NUMBER);
@@ -96,6 +108,28 @@ public class MainActivity extends FragmentActivity implements
     super.onSaveInstanceState(outState);
     outState.putInt(Constants.VenueClickParams.VENUE_CLICKED_NUMBER, mVenueClickedNumber);
     outState.putBoolean(Constants.VenueClickParams.IS_VENUE_CLICKED_4_DETAILS, mIsVenueClicked4Details);
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    // Inflate the menu; this adds items to the action bar if it is present.
+    getMenuInflater().inflate(R.menu.menu_main, menu);
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case R.id.action_about:
+        Intent intent = new Intent(this, AboutActivity.class);
+        startActivity(intent);
+        return true;
+      case R.id.action_exit:
+        finish();
+        return true;
+      default:
+        return super.onOptionsItemSelected(item);
+    } //switch
   }
 
   @Override

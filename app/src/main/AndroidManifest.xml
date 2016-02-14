@@ -29,9 +29,14 @@
 
         <activity
             android:label="@string/title_activity_details"
-            android:parentActivityName=".MainActivity"
             android:name=".DetailsActivity" >
         </activity>
+        <activity
+            android:label="@string/title_about"
+            android:theme="@android:style/Theme.Dialog"
+            android:name=".AboutActivity">
+        </activity>
+
 
     </application>
 

@@ -1,8 +1,11 @@
 package com.example.ol.venuelocator;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.example.ol.venuelocator.venues.Venue;
@@ -65,5 +68,35 @@ public class DetailsActivity extends AppCompatActivity {
     super.onRestoreInstanceState(savedInstanceState);
     venueNumber = savedInstanceState.getInt(Constants.VenueClickParams.VENUE_CLICKED_NUMBER);
     Log.d(LOG_TAG, "onRestoreInstanceState");
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    // Inflate the menu; this adds items to the action bar if it is present.
+    getMenuInflater().inflate(R.menu.menu_main, menu);
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    Intent intent;
+    switch (item.getItemId()) {
+      case R.id.action_about:
+        intent = new Intent(this, AboutActivity.class);
+        startActivity(intent);
+        return true;
+      case R.id.action_exit:
+        /**
+         * start (get it back to top) parent Main activity, closing all anothers
+         * send 'exit' sign to it for further finish procedure
+         */
+        intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("EXIT", true);
+        startActivity(intent);
+        return true;
+      default:
+        return super.onOptionsItemSelected(item);
+    } //switch
   }
 }
