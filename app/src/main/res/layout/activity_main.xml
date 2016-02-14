@@ -24,6 +24,8 @@
         <Button
             android:id="@+id/bt1"
             android:text="@string/bt1"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
         </Button>

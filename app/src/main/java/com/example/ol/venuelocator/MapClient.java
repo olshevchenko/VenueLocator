@@ -43,7 +43,7 @@ public class MapClient implements Logic.onPlacesMapProcessor {
     UiSettings uiSettings = mGoogleMap.getUiSettings();
     uiSettings.setCompassEnabled(true);
     uiSettings.setMapToolbarEnabled(true);
-    uiSettings.setMyLocationButtonEnabled(true);
+//    uiSettings.setMyLocationButtonEnabled(true);
     uiSettings.setRotateGesturesEnabled(false);
     uiSettings.setTiltGesturesEnabled(false);
     uiSettings.setScrollGesturesEnabled(true);
@@ -73,7 +73,7 @@ public class MapClient implements Logic.onPlacesMapProcessor {
       mMarkersList.add(mGoogleMap.addMarker(
           new MarkerOptions()
               .position(markerPosition)
-              .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))));
+              .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))));
     }
     return true;
   }
@@ -87,11 +87,19 @@ public class MapClient implements Logic.onPlacesMapProcessor {
    */
   @Override
   public boolean placeSelect(int position, Venue venue2Select) {
-//    Log.d(LOG_TAG, "placesSelect() for venue[" + position + "]");
 
+    /// 1'st, hide info & convert old selection back into normal marker form (if exists)
+    if (null != mSelected) {
+      mSelected.hideInfoWindow();
+      mSelected.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+    }
+
+    /// 2'nd, move maps camera
+
+/**
+ * doesn't look as expected - leave it...
     /// try to combine our own location with the selected one
-/*
-    LatLngBounds bounds = new LatLngBounds(mCurrentLatLng,
+    LatLngBounds bounds = createCorrectLatLngBounds(mCurrentLatLng,
         new LatLng(venue2Select.getLocation().getLtt(),
             venue2Select.getLocation().getLng()));
     mGoogleMap.animateCamera(
@@ -101,15 +109,14 @@ public class MapClient implements Logic.onPlacesMapProcessor {
         new LatLng(venue2Select.getLocation().getLtt(),
             venue2Select.getLocation().getLng())));
 
-    ///1'st, convert old selection back into normal marker form (if exists)
-    if (null != mSelected)
-      mSelected.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-
-    ///then, find the new selection in the existed markers list (by venues position)
+    /// 3'rd, find the new selection in the existed markers list (by venues position)
     mSelected = mMarkersList.get(position);
 
-    ///convert normal marker into selection form
+    /// and convert normal marker into selection view
     mSelected.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+    mSelected.setTitle(venue2Select.getHeader().getName());
+    mSelected.setSnippet(venue2Select.getHeader().getPrimCategoryName());
+    mSelected.showInfoWindow();
     return true;
   }
 
@@ -117,6 +124,22 @@ public class MapClient implements Logic.onPlacesMapProcessor {
   public void positionMove(LatLng location) {
     mCurrentLatLng = location;
     mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(location));
+  }
+
+  /**
+   * creates correct LatLngBounds from ANY corner of bounds rectangle
+   * @param corner1
+   * @param corner2
+   * @return - bounds instance
+   */
+  private LatLngBounds createCorrectLatLngBounds(LatLng corner1, LatLng corner2) {
+    LatLng southwest = new LatLng(
+        Math.min(corner1.latitude, corner2.latitude),
+        Math.min(corner1.longitude, corner2.longitude));
+    LatLng northeast = new LatLng(
+        Math.max(corner1.latitude, corner2.latitude),
+        Math.max(corner1.longitude, corner2.longitude));
+    return new LatLngBounds(southwest, northeast);
   }
 
 }

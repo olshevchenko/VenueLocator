@@ -62,7 +62,7 @@ public class VenuesListAdapter extends ArrayAdapter<Venue> {
 
     holder.tvVenueName.setText(vHeader.getName());
     holder.tvVenueCategory.setText(vHeader.getPrimCategoryName());
-    holder.tvVenueDistance.setText("(" + String.valueOf(vHeader.getDistance()) + ")");
+    holder.tvVenueDistance.setText("(" + String.valueOf(vHeader.getDistance()) + "m. to go)");
 
     holder.ibtSwitch2Details.setTag(position);
     holder.ibtSwitch2Details.setOnClickListener(new View.OnClickListener() {

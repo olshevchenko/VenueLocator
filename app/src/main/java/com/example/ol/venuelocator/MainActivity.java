@@ -73,9 +73,12 @@ public class MainActivity extends FragmentActivity implements
     GlobalStorage globalStorage = (GlobalStorage)getApplicationContext();
     mVHelper = globalStorage.getVHelper();
 
-    ///get interface reference on the VenuesListFragment
+    /// get interface reference on the VenuesListFragment
     mPlacesRefreshHeadersProcessor = (VenuesListFragment) getSupportFragmentManager()
         .findFragmentById(R.id.frVenuesList);
+
+    /// get location instance
+    mLocationClient = new LocationClient(this, getSupportFragmentManager());
 
     ///get a Google map instance
     SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -102,13 +105,10 @@ public class MainActivity extends FragmentActivity implements
     mMapClient = new MapClient(googleMap); /// init & tune our map instance from the Google one
     mPlacesMarkProcessor = mMapClient;
 
-    mLocationClient = new LocationClient(this); /// init & tune location instance
-
     mHttpClient = new FoursquareClient(this); /// init & tune Foursquare HTTP instance
     mPlacesSearchProcessor = mHttpClient;
 
-    mLocationClient.position(); /// start main logic based on location change detection
-
+    mLocationClient.getLocation(); /// start main logic based on location change detection
   }
 
 
@@ -135,8 +135,6 @@ public class MainActivity extends FragmentActivity implements
     if (null != mPlacesSearchProcessor)
       mPlacesSearchProcessor.placesSearch(new Venue(location.latitude, location.longitude));
   }
-
-
 
 
   /**

@@ -42,7 +42,7 @@ public class DetailsActivity extends AppCompatActivity {
     try {
       venue = mVHelper.getVenue(venueNumber);
     } catch (IndexOutOfBoundsException ex) {
-      Log.e(LOG_TAG, "OUTOFBOUNDS venue number got through intent parameter - finish activity");
+      Log.e(LOG_TAG, "OutOfBounds venue number got through intent parameter - finish activity");
       finish();
     }
 

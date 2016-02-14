@@ -43,6 +43,8 @@ public class FoursquareClient implements Logic.onPlacesSearchProcessor {
 
     VenuesSearchResponse resultResponse = null;
 
+    Log.d(LOG_TAG, "++++++++++HTTP++++++++++ placesSearch()..");
+
     mApiParams.setLocation(currPosition.getLocation().getLtt(), currPosition.getLocation().getLng());
 
     final ProgressDialog dialog = ProgressDialog.show(mContext, "",
@@ -73,6 +75,8 @@ public class FoursquareClient implements Logic.onPlacesSearchProcessor {
               /// just skip one venue & continue loop
             }
           }
+          Log.d(LOG_TAG, "++++++++++HTTP++++++++++ got new [" + venueList.size() + "] venues");
+
           if (null !=  mPlacesUpdateProcessor)
             mPlacesUpdateProcessor.placesUpdate(venueList);
 

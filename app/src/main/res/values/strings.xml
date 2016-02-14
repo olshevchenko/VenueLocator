@@ -9,6 +9,10 @@
     <string name="title_activity_main">Venue Locator - Main</string>
     <string name="title_activity_details">Venue Locator - Details</string>
 
+    <!-- LocationClient -->
+    <string name="dlgLocationServiceFailedTitle">Location failed</string>
+    <string name="dlgLocationServiceFailedMessage">Can NOT define location (GPS and networks are disabled).</string>
+
     <!-- MapClient -->
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
         AIzaSyCzIlbrnmmXgCz71wIsnJM6S1QHv78fSkw </string>
