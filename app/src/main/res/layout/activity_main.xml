@@ -7,7 +7,16 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity">
-
+    <fragment
+        android:id="@+id/fragment_map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:name="com.google.android.gms.maps.SupportMapFragment">
+    </fragment>
+    <View
+        style="@style/HDividerView"
+        android:layout_height="10dp"/>
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -15,13 +24,7 @@
         <Button
             android:id="@+id/bt1"
             android:text="@string/bt1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-        </Button>
-        <Button
-            android:id="@+id/bt2"
-            android:text="@string/bt2"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
         </Button>
     </LinearLayout>
@@ -34,16 +37,4 @@
         android:name="com.example.ol.venuelocator.VenuesListFragment">
     </fragment>
 
-    <fragment
-        android:id="@+id/fragment_map"
-        xmlns:map="http://schemas.android.com/apk/res-auto"
-        tools:ignore="MissingPrefix"
-        map:uiZoomControls="true"
-        map:uiZoomGestures="true"
-        map:uiCompass="true"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:name="com.google.android.gms.maps.SupportMapFragment">
-    </fragment>
 </LinearLayout>

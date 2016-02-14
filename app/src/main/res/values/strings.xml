@@ -9,11 +9,11 @@
     <string name="title_activity_main">Venue Locator - Main</string>
     <string name="title_activity_details">Venue Locator - Details</string>
 
-    <!-- Map -->
+    <!-- MapClient -->
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
         AIzaSyCzIlbrnmmXgCz71wIsnJM6S1QHv78fSkw </string>
     <string name="dlgGettingAccess2GoogleMap">Getting access to Google Map...</string>
-    <string name="bt1">Loc1</string>
+    <string name="bt1">Move!</string>
     <string name="bt2">Loc2</string>
 
     <!-- Venues list -->

@@ -6,13 +6,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal">
-
+    <fragment
+        android:id="@+id/fragment_map"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        tools:ignore="MissingPrefix"
+        map:uiZoomControls="true"
+        map:uiZoomGestures="true"
+        map:uiCompass="true"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:name="com.google.android.gms.maps.SupportMapFragment">
+    </fragment>
+    <View
+        style="@style/VDividerView"
+        android:layout_width="10dp"/>
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="1">
-
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -38,16 +51,4 @@
             android:name="com.example.ol.venuelocator.VenuesListFragment">
         </fragment>
     </LinearLayout>
-    <fragment
-        android:id="@+id/fragment_map"
-        xmlns:map="http://schemas.android.com/apk/res-auto"
-        tools:ignore="MissingPrefix"
-        map:uiZoomControls="true"
-        map:uiZoomGestures="true"
-        map:uiCompass="true"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:name="com.google.android.gms.maps.SupportMapFragment">
-    </fragment>
 </LinearLayout>

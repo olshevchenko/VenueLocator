@@ -15,6 +15,12 @@ public final class Constants {
   }
 
   public class Locations {
+    public static final float MAP_DEFAULT_ZOOM_LEVEL = 16.0f; /// streets => buildings
+    public static final int MAP_DEFAULT_BOUNDS_PADDING = 10; /// borders gap in pixels
+
+    public static final int UPDATE_INTERVAL_TIME = 10000; /// in mS
+    public static final float UPDATE_INTERVAL_DISTANCE = 100.0f; /// in meters
+
     public static final String LL_FORMAT = "###.#####"; ///format for GET http request
     public static final double VAL1_LATT = 47.2055319;
     public static final double VAL1_LONG = 38.9348749;

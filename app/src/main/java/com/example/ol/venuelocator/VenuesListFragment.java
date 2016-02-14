@@ -93,7 +93,6 @@ public class VenuesListFragment extends Fragment implements Logic.onPlacesRefres
   public void placesRefreshHeaders() {
     Log.i(LOG_TAG, "placesRefreshHeaders()");
 
-    mVHelper.getVenueList().remove(0);
     if (null != mVenuesListAdapter)
       mVenuesListAdapter.notifyDataSetChanged();
   }

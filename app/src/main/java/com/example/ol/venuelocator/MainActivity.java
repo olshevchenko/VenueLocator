@@ -9,10 +9,12 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import com.example.ol.venuelocator.venues.VenuesHelper;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 
@@ -20,32 +22,39 @@ import java.util.List;
 public class MainActivity extends FragmentActivity implements
     VenuesListFragment.onVenueClickListener,
     Logic.onPlacesUpdateProcessor,
+    Logic.onLocationUpdateProcessor,
     OnMapReadyCallback,
     View.OnClickListener {
   //for logging
   private static final String LOG_TAG = MainActivity.class.getName();
 
-///ToDo REMOVE it!
-  private static double ltt = Constants.Locations.VAL1_LATT;
-  private static double lng = Constants.Locations.VAL1_LONG;
-
-
   /// VenuesListFragment reference & pure interface reference on VenuesListFragment
   private Logic.onPlacesRefreshHeadersProcessor mPlacesRefreshHeadersProcessor = null;
 
+  /// location client instance
+  private LocationClient mLocationClient = null;
+
   /// map instance & pure interface reference on it
-  private Map mMap = null;
-  private Logic.onPlacesMarkProcessor mPlacesMarkProcessor = null;
+  private MapClient mMapClient = null;
+  private Logic.onPlacesMapProcessor mPlacesMarkProcessor = null;
 
   /// Foursquare client instance & pure interface reference on it
   private FoursquareClient mHttpClient = null;
   private Logic.onPlacesSearchProcessor mPlacesSearchProcessor = null;
 
   private ProgressDialog mPleaseWaitDialog;
-  private Button mBtLoc1, mBtLoc2;
+  ///ToDo REMOVE it after debug!
+  private Button mBtLoc1;
 
+  /**
+   * current venue header index & his event type
+   */
   private int mVenueClickedNumber = -1;
   private boolean mIsVenueClicked4Details = false;
+
+  /// current location data
+  private static LatLng mCurrentLatLng;
+
   private VenuesHelper mVHelper;
 
   @Override
@@ -59,8 +68,6 @@ public class MainActivity extends FragmentActivity implements
 
     mBtLoc1 = (Button) findViewById(R.id.bt1);
     mBtLoc1.setOnClickListener(this);
-    mBtLoc2 = (Button) findViewById(R.id.bt2);
-    mBtLoc2.setOnClickListener(this);
 
     ///get access to globally stored venues list
     GlobalStorage globalStorage = (GlobalStorage)getApplicationContext();
@@ -92,19 +99,48 @@ public class MainActivity extends FragmentActivity implements
   public void onMapReady(GoogleMap googleMap) {
     mPleaseWaitDialog.dismiss();
 
-    mMap = new Map(googleMap); /// init & tune our map instance from the Google one
-    mPlacesMarkProcessor = mMap;
+    mMapClient = new MapClient(googleMap); /// init & tune our map instance from the Google one
+    mPlacesMarkProcessor = mMapClient;
+
+    mLocationClient = new LocationClient(this); /// init & tune location instance
 
     mHttpClient = new FoursquareClient(this); /// init & tune Foursquare HTTP instance
     mPlacesSearchProcessor = mHttpClient;
 
-    /// asynchronously call (Foursquare) venues search for current location
-/// ToDo Use CURRENT loc.!
-    mPlacesSearchProcessor.placesSearch(new Venue(Constants.Locations.VAL1_LATT, Constants.Locations.VAL1_LONG));
+    mLocationClient.position(); /// start main logic based on location change detection
+
   }
 
+
+  @Override
+  protected void onDestroy() {
+    mLocationClient.exit();
+    mVHelper.clear();
+    super.onDestroy();
+  }
+
+
   /**
-   * ToDo describe it!
+   *
+   */
+  @Override
+  public void locationUpdate(LatLng location) {
+    mCurrentLatLng = location;
+
+    /// change map position
+    if (null != mPlacesMarkProcessor)
+      mPlacesMarkProcessor.positionMove(location);
+
+    /// asynchronously call (Foursquare) venues search for current location
+    if (null != mPlacesSearchProcessor)
+      mPlacesSearchProcessor.placesSearch(new Venue(location.latitude, location.longitude));
+  }
+
+
+
+
+  /**
+   * completely processes venues update event (changes storage, refresh headers, redraws map)
    * @param newList - list of updated venues
    */
   @Override
@@ -135,13 +171,13 @@ public class MainActivity extends FragmentActivity implements
 
   @Override
   public void onClick(View v) {
-
     switch (v.getId()) {
       case R.id.bt1:
-      case R.id.bt2:
-        ltt += 0.001;
-        lng -= 0.0005;
-        mPlacesSearchProcessor.placesSearch(new Venue(ltt, lng));
+        /// move to West-West-Nord (around Taganrog)
+        mCurrentLatLng = new LatLng(mCurrentLatLng.latitude + 0.001,
+            mCurrentLatLng.longitude - 0.0005);
+        Log.d(LOG_TAG, "DBG - falsely change location to " + mCurrentLatLng);
+        locationUpdate(mCurrentLatLng);
         break;
       default:
         break;

@@ -30,8 +30,8 @@ public class FoursquareClient implements Logic.onPlacesSearchProcessor {
   /// venues update processor interface
   private Logic.onPlacesUpdateProcessor mPlacesUpdateProcessor = null;
 
-  public FoursquareClient(Context mContext) {
-    this.mContext = mContext;
+  public FoursquareClient(Context context) {
+    this.mContext = context;
     mPlacesUpdateProcessor = (Logic.onPlacesUpdateProcessor) mContext;
     mApiParams = new ApiParams(); /// init default location
     mApi = FoursquareAPI.getApi();
@@ -90,28 +90,5 @@ public class FoursquareClient implements Logic.onPlacesSearchProcessor {
     });
   }
 
-
-/*
-  public Map<String, Double> getVenues() throws RetrofitError {
-    List<VenueDto> currencyRates;
-    try {
-      Response response = api.getResponse(url.getLocation(),
-          Constants.Url.CLIENT_VALUE, Constants.Url.CLIENT_SECRET_VALUE,
-          Constants.Url.V_PARAM_VALUE);
-      Log.d(LOG_TAG, "Got response: " + response);
-      venues = response.getVenues();
-    } catch (RetrofitError error) {
-        if (error.getResponse() != null) {
-            int code = error.getResponse().getStatus();
-            Log.e(LOG_TAG, "Http error, status : " + code);
-        } else {
-            Log.e(LOG_TAG, "Unknown error");
-            error.printStackTrace();
-        }
-        throw error;
-    }
-    return currencyRates;
-  }
-*/
 } //public class FoursquareAPI
 
