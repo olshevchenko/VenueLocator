@@ -11,6 +11,9 @@ import android.widget.TextView;
 import com.example.ol.venuelocator.venues.Venue;
 import com.example.ol.venuelocator.venues.VenuesHelper;
 
+/**
+ * Shows detail information about venue pointed on the Main Activity
+ */
 public class DetailsActivity extends AppCompatActivity {
   //for logging
   private static final String LOG_TAG = DetailsActivity.class.getName();
@@ -25,15 +28,16 @@ public class DetailsActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_details);
     if (savedInstanceState != null)
-      venueNumber = savedInstanceState.getInt(Constants.VenueClickParams.VENUE_CLICKED_NUMBER);
+      venueNumber = savedInstanceState.getInt(Constants.SavedParams.VENUE_NUMBER);
     else
-      venueNumber = getIntent().getIntExtra(Constants.VenueClickParams.VENUE_CLICKED_NUMBER, -1);
+      venueNumber = getIntent().getIntExtra(Constants.SavedParams.VENUE_NUMBER, -1);
 
     if (venueNumber < 0) {
       Log.e(LOG_TAG, "INCORRECT venue number got through intent parameter - finish activity");
       finish();
     }
 
+    /// get access to venues list global storage to get venue detail info there
     GlobalStorage globalStorage = (GlobalStorage)getApplicationContext();
     mVHelper = globalStorage.getVHelper();
 
@@ -59,14 +63,14 @@ public class DetailsActivity extends AppCompatActivity {
   @Override
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
-    outState.putInt(Constants.VenueClickParams.VENUE_CLICKED_NUMBER, venueNumber);
+    outState.putInt(Constants.SavedParams.VENUE_NUMBER, venueNumber);
     Log.d(LOG_TAG, "onSaveInstanceState");
   }
 
   @Override
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
-    venueNumber = savedInstanceState.getInt(Constants.VenueClickParams.VENUE_CLICKED_NUMBER);
+    venueNumber = savedInstanceState.getInt(Constants.SavedParams.VENUE_NUMBER);
     Log.d(LOG_TAG, "onRestoreInstanceState");
   }
 

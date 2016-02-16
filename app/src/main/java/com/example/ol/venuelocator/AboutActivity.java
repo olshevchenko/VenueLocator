@@ -3,6 +3,9 @@ package com.example.ol.venuelocator;
 import android.app.Activity;
 import android.os.Bundle;
 
+/**
+ * Simple information 'About' activity
+ */
 public class AboutActivity extends Activity {
 
   @Override

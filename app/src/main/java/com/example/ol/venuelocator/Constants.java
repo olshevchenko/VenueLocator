@@ -1,7 +1,7 @@
 package com.example.ol.venuelocator;
 
 /**
- * Created by oshevchenk on 03.02.2016.
+ * Constants necessary for operation
  */
 public final class Constants {
   public class Languages {
@@ -9,9 +9,9 @@ public final class Constants {
     public static final String RUS = "ru";
   }
 
-  public class VenueClickParams {
-    public static final String VENUE_CLICKED_NUMBER = "venueClickedNumber";
-    public static final String IS_VENUE_CLICKED_4_DETAILS = "isVenueClicked4Details";
+  public class SavedParams {
+    public static final String VENUE_NUMBER = "venueNumber";
+    public static final String LATLNG = "LatLng";
   }
 
   public class Locations {
@@ -24,9 +24,6 @@ public final class Constants {
     public static final String LL_FORMAT = "###.#####"; ///format for GET http request
     public static final double VAL1_LATT = 47.2055319;
     public static final double VAL1_LONG = 38.9348749;
-
-    public static final float VAL2_LATT = 47.21043f;
-    public static final float VAL2_LONG = 38.92240f;
 
     public static final String ILLEGAL_LL_LAT_VALUE = "Illegal location latitude value";
     public static final String ILLEGAL_LL_LNG_VALUE = "Illegal location longitude value";

@@ -1,9 +1,5 @@
 package com.example.ol.venuelocator.http;
 
-/**
- * Created by ol on 08.02.16.
- */
-
 import com.example.ol.venuelocator.http.dto.MetaDto;
 import com.example.ol.venuelocator.http.dto.ResponseDto;
 

@@ -14,7 +14,7 @@ import com.example.ol.venuelocator.venues.Venue;
 import java.util.List;
 
 /**
- * Created by ol on 28.11.15.
+ * class - custom list adapter for venue headers
  */
 public class VenuesListAdapter extends ArrayAdapter<Venue> {
   //for logging

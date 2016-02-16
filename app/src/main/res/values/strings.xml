@@ -17,18 +17,31 @@
     <!-- About activity -->
     <string name="title_about">About</string>
     <string name="aboutText">
-        Here is a small venues locator application.\n
-        It locates your position \n
-        (both via GPS or network services) \n
-        and prepares nearest venue points \n
+        Here is a small venues locator application. It locates your position
+        (both via GPS or network services) and prepares nearest venue points
         requesting Foursquare server.\n
-        The resulting venues list is displayed \n
-        as map markers and a list of venues header info.
+        The resulting venues are displayed as map markers and as a list of
+        venues header info.\n
+        You can click on the header to view corresponding map closer, or click
+        arrow → to get additional information about the venue.
     </string>
+
+    <!-- GoogleApi -->
+    <string name="dlgGoogleApiFailedTitle">Google Play services problem</string>
+    <string name="dlgGoogleApiFailedMessage">Google Play services is not installed or disabled
+        on your device, or needs update</string>
+
 
     <!-- LocationClient -->
     <string name="dlgLocationServiceFailedTitle">Location failed</string>
-    <string name="dlgLocationServiceFailedMessage">Can NOT define location (GPS and networks are disabled).</string>
+    <string name="dlgLocationServiceFailedMessage">Unable to define location (GPS and networks are
+        disabled). Check your location services.</string>
+    <string name="butPosLocationServiceFix">Open location services</string>
+    <string name="butNegLocationServiceFix">Cancel</string>
+
+    <!-- FoursquareClient -->
+    <string name="dlgHTTPServiceFailedTitle">Network failed</string>
+    <string name="dlgHTTPServiceFailedMessage">Unable to search venues. Check your network connection.</string>
 
     <!-- MapClient -->
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">

@@ -7,14 +7,9 @@ import com.example.ol.venuelocator.venues.VenuesHelper;
  */
 public class GlobalStorage extends android.app.Application {
 
-  private VenuesHelper vHelper = new VenuesHelper();
+  private static VenuesHelper vHelper = new VenuesHelper();
 
   public VenuesHelper getVHelper() {
     return vHelper;
-  }
-
-  @Override
-  public void onCreate() {
-    super.onCreate();
   }
 }

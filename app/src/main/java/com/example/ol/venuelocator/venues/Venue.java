@@ -8,7 +8,7 @@ import com.example.ol.venuelocator.http.dto.VenueDto;
 import java.util.List;
 
 /**
- * Created by ol on 03.02.16.
+ * main venue data description
  */
 public class Venue {
   //for logging

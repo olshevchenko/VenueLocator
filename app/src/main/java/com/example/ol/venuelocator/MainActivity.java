@@ -2,6 +2,8 @@ package com.example.ol.venuelocator;
 
 import com.example.ol.venuelocator.http.FoursquareClient;
 import com.example.ol.venuelocator.venues.Venue;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -20,9 +22,11 @@ import com.example.ol.venuelocator.venues.VenuesHelper;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
-import java.util.Locale;
 
 
+/**
+ * application Main activity
+ */
 public class MainActivity extends AppCompatActivity implements
     VenuesListFragment.onVenueClickListener,
     Logic.onPlacesUpdateProcessor,
@@ -31,6 +35,9 @@ public class MainActivity extends AppCompatActivity implements
     View.OnClickListener {
   //for logging
   private static final String LOG_TAG = MainActivity.class.getName();
+
+  /// global venues list holder
+  private VenuesHelper mVHelper = null;
 
   /// VenuesListFragment reference & pure interface reference on VenuesListFragment
   private Logic.onPlacesRefreshHeadersProcessor mPlacesRefreshHeadersProcessor = null;
@@ -48,20 +55,46 @@ public class MainActivity extends AppCompatActivity implements
 
   private ProgressDialog mPleaseWaitDialog;
   private ActionBar mActionBar;
-
   ///ToDo REMOVE it after debug!
   private Button mBtLoc1;
 
-  /**
-   * current venue header index & his event type
-   */
-  private int mVenueClickedNumber = -1;
-  private boolean mIsVenueClicked4Details = false;
+  /// current SELECTED venue header index
+  private int mVenueSelectedNumber = -1;
 
   /// current location data
-  private static LatLng mCurrentLatLng;
+  private static LatLng mCurrentLatLng = new LatLng(0, 0);
 
-  private VenuesHelper mVHelper;
+
+  private static class CustomNonConfigurationInstance {
+    private VenuesHelper mVHelper = null;
+    private LocationClient mLocationClient = null;
+    private MapClient mMapClient = null;
+    private FoursquareClient mHttpClient = null;
+
+    public CustomNonConfigurationInstance(VenuesHelper vHelper,
+        LocationClient locationClient, MapClient mapClient, FoursquareClient httpClient) {
+      this.mVHelper = vHelper;
+      this.mLocationClient = locationClient;
+      this.mMapClient = mapClient;
+      this.mHttpClient = httpClient;
+    }
+
+    public VenuesHelper getVHelper() {
+      return mVHelper;
+    }
+
+    public LocationClient getLocationClient() {
+      return mLocationClient;
+    }
+
+    public MapClient getMapClient() {
+      return mMapClient;
+    }
+
+    public FoursquareClient getHttpClient() {
+      return mHttpClient;
+    }
+  }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -72,43 +105,104 @@ public class MainActivity extends AppCompatActivity implements
       finish();
     }
 
+    /// check if Google Play services is available
+    int res = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
+    if (res != ConnectionResult.SUCCESS) {
+      Log.e(LOG_TAG, "GooglePlayServices is unavailable (ConnectionResult code " + res + "). Finishing...");
+      Informing.ServiceFailedDialogFragment sfDialogFragment =
+          Informing.ServiceFailedDialogFragment.newInstance(
+              R.string.dlgGoogleApiFailedTitle,
+              R.string.dlgGoogleApiFailedMessage,
+              R.drawable.ic_error_white_36dp);
+      sfDialogFragment.show(getSupportFragmentManager(), "dialog");
+      finish();
+    }
+
     setContentView(R.layout.activity_main);
-    if (savedInstanceState != null) {
-      mVenueClickedNumber = savedInstanceState.getInt(Constants.VenueClickParams.VENUE_CLICKED_NUMBER);
-      mIsVenueClicked4Details = savedInstanceState.getBoolean(Constants.VenueClickParams.IS_VENUE_CLICKED_4_DETAILS);
+
+    /// check whether it's cfg change or real new activity creation
+    CustomNonConfigurationInstance nonCfgInstance =
+        (CustomNonConfigurationInstance) getLastCustomNonConfigurationInstance();
+    if (nonCfgInstance != null) {
+      this.mVHelper = nonCfgInstance.getVHelper();
+      this.mLocationClient = nonCfgInstance.getLocationClient();
+      this.mMapClient = nonCfgInstance.getMapClient();
+      this.mHttpClient = nonCfgInstance.getHttpClient();
     }
 
     mBtLoc1 = (Button) findViewById(R.id.bt1);
     mBtLoc1.setOnClickListener(this);
 
-    ///get access to globally stored venues list
-    GlobalStorage globalStorage = (GlobalStorage)getApplicationContext();
-    mVHelper = globalStorage.getVHelper();
-
     /// get interface reference on the VenuesListFragment
     mPlacesRefreshHeadersProcessor = (VenuesListFragment) getSupportFragmentManager()
         .findFragmentById(R.id.frVenuesList);
 
-    /// get location instance
-    mLocationClient = new LocationClient(this, getSupportFragmentManager());
+    ///get access to globally stored venues list - IF NOT EXISTS ALREADY
+    if (null == mVHelper) {
+      GlobalStorage globalStorage = (GlobalStorage) getApplicationContext();
+      mVHelper = globalStorage.getVHelper();
+    }
 
-    ///get a Google map instance
-    SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-        .findFragmentById(R.id.fragment_map);
+    /// get location instance - IF NOT EXISTS ALREADY
+    if (null == mLocationClient) {
+      mLocationClient = new LocationClient(this, getSupportFragmentManager());
+    }
 
-    ///show "wait for the map" dialog due to indefinite getMapAsync() result
-    mPleaseWaitDialog = ProgressDialog.show(this, "",
-        getString(R.string.dlgGettingAccess2GoogleMap), false, false);
+    /// init & tune Foursquare HTTP instance - IF NOT EXISTS ALREADY
+    if (null == mHttpClient) {
+      mHttpClient = new FoursquareClient(this, getSupportFragmentManager());
+    }
+    mPlacesSearchProcessor = mHttpClient;
 
-    mapFragment.getMapAsync(this);
+    ///get a Google map instance if not exists
+    if (null == mMapClient) {
+      SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+          .findFragmentById(R.id.fragment_map);
+      mapFragment.setRetainInstance(true);
+
+      ///show "wait for the map" dialog due to indefinite getMapAsync() result
+      mPleaseWaitDialog = ProgressDialog.show(this, "",
+          getString(R.string.dlgGettingAccess2GoogleMap), false, false);
+
+      mapFragment.getMapAsync(this);
+    }
+    else {
+      /**
+       * we're after cfg change - therefore no needs ti init / tune map
+       * venue headers list, map markers & selection are up-to-date
+       */
+      mPlacesMarkProcessor = mMapClient;
+      ; /// just wait now for NEW user events
+    }
   }
 
   @Override
-  public void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    outState.putInt(Constants.VenueClickParams.VENUE_CLICKED_NUMBER, mVenueClickedNumber);
-    outState.putBoolean(Constants.VenueClickParams.IS_VENUE_CLICKED_4_DETAILS, mIsVenueClicked4Details);
+  public void onMapReady(GoogleMap googleMap) {
+    mPleaseWaitDialog.dismiss();
+    mMapClient = new MapClient(googleMap); /// init & tune our map instance from the Google one
+    mPlacesMarkProcessor = mMapClient;
+
+    mLocationClient.getLocation(); /// start main logic based on location change detection
   }
+
+  @Override
+  public Object onRetainCustomNonConfigurationInstance() {
+    super.onRetainCustomNonConfigurationInstance();
+    return new CustomNonConfigurationInstance(mVHelper, mLocationClient, mMapClient, mHttpClient);
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    if (isFinishing()) {
+      mLocationClient.exit();
+      mVHelper.clear();
+      mMapClient.exit();
+    }
+    else
+      ; /// skip finalization in change orientation case (data will be needed soon)
+  }
+
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -132,30 +226,9 @@ public class MainActivity extends AppCompatActivity implements
     } //switch
   }
 
-  @Override
-  public void onMapReady(GoogleMap googleMap) {
-    mPleaseWaitDialog.dismiss();
-
-    mMapClient = new MapClient(googleMap); /// init & tune our map instance from the Google one
-    mPlacesMarkProcessor = mMapClient;
-
-    mHttpClient = new FoursquareClient(this); /// init & tune Foursquare HTTP instance
-    mPlacesSearchProcessor = mHttpClient;
-
-    mLocationClient.getLocation(); /// start main logic based on location change detection
-  }
-
-
-  @Override
-  protected void onDestroy() {
-    mLocationClient.exit();
-    mVHelper.clear();
-    super.onDestroy();
-  }
-
-
   /**
-   *
+   * process update location event - change map view position & request for new venues for it
+   * @param location - new location to process
    */
   @Override
   public void locationUpdate(LatLng location) {
@@ -168,6 +241,7 @@ public class MainActivity extends AppCompatActivity implements
     /// asynchronously call (Foursquare) venues search for current location
     if (null != mPlacesSearchProcessor)
       mPlacesSearchProcessor.placesSearch(new Venue(location.latitude, location.longitude));
+    /// look at placesUpdate() below to view how to process placesSearch() results...
   }
 
 
@@ -178,6 +252,7 @@ public class MainActivity extends AppCompatActivity implements
   @Override
   public void placesUpdate(List<Venue> newList) {
     mVHelper.setVenueList(newList);
+    mVenueSelectedNumber = -1;
     if (null != mPlacesRefreshHeadersProcessor)
       mPlacesRefreshHeadersProcessor.placesRefreshHeaders();
     if (null != mPlacesMarkProcessor)
@@ -192,12 +267,13 @@ public class MainActivity extends AppCompatActivity implements
    */
   @Override
   public void venueClick(int position, boolean isDetailClick) {
-    mVenueClickedNumber = position;
-    mIsVenueClicked4Details = isDetailClick;
     if (isDetailClick)
       showVenueDetail(position);
-    else
-      mPlacesMarkProcessor.placeSelect(position, mVHelper.getVenue(position));
+    else {
+      mVenueSelectedNumber = position;
+      if (null != mPlacesMarkProcessor)
+        mPlacesMarkProcessor.placeSelect(position, mVHelper.getVenue(position));
+    }
   }
 
 
@@ -205,11 +281,12 @@ public class MainActivity extends AppCompatActivity implements
   public void onClick(View v) {
     switch (v.getId()) {
       case R.id.bt1:
+        /// ToDo DEBUG feature - REMOVE it later for release version
         /// move to West-West-Nord (around Taganrog)
-        mCurrentLatLng = new LatLng(mCurrentLatLng.latitude + 0.001,
+        LatLng newLatLng = new LatLng(mCurrentLatLng.latitude + 0.001,
             mCurrentLatLng.longitude - 0.0005);
         Log.d(LOG_TAG, "DBG - falsely change location to " + mCurrentLatLng);
-        locationUpdate(mCurrentLatLng);
+        locationUpdate(newLatLng);
         break;
       default:
         break;
@@ -218,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements
 
   void showVenueDetail(int number) {
     startActivity(new Intent(this, DetailsActivity.class).
-        putExtra(Constants.VenueClickParams.VENUE_CLICKED_NUMBER, number));
+        putExtra(Constants.SavedParams.VENUE_NUMBER, number));
   }
 
 }

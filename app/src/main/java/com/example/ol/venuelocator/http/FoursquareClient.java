@@ -2,9 +2,11 @@ package com.example.ol.venuelocator.http;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
 import com.example.ol.venuelocator.GlobalStorage;
+import com.example.ol.venuelocator.Informing;
 import com.example.ol.venuelocator.Logic;
 import com.example.ol.venuelocator.R;
 import com.example.ol.venuelocator.http.dto.VenueDto;
@@ -18,11 +20,16 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * class for Retrofit operation with Foursquare HTTP server
+ * requests ('search') for venues list nearest to location pointed
+ */
 public class FoursquareClient implements Logic.onPlacesSearchProcessor {
   //for logging
   private static final String LOG_TAG = FoursquareClient.class.getName();
 
   private Context mContext;
+  private FragmentManager mFM;
   private FoursquareAPI.Api mApi;
   private ApiParams mApiParams;
   private VenuesHelper mVHelper;
@@ -30,8 +37,9 @@ public class FoursquareClient implements Logic.onPlacesSearchProcessor {
   /// venues update processor interface
   private Logic.onPlacesUpdateProcessor mPlacesUpdateProcessor = null;
 
-  public FoursquareClient(Context context) {
+  public FoursquareClient(Context context, FragmentManager fm) {
     this.mContext = context;
+    this.mFM = fm;
     mPlacesUpdateProcessor = (Logic.onPlacesUpdateProcessor) mContext;
     mApiParams = new ApiParams(); /// init default location
     mApi = FoursquareAPI.getApi();
@@ -40,10 +48,7 @@ public class FoursquareClient implements Logic.onPlacesSearchProcessor {
   }
 
   public void placesSearch(Venue currPosition) {
-
     VenuesSearchResponse resultResponse = null;
-
-    Log.d(LOG_TAG, "++++++++++HTTP++++++++++ placesSearch()..");
 
     mApiParams.setLocation(currPosition.getLocation().getLtt(), currPosition.getLocation().getLng());
 
@@ -75,7 +80,7 @@ public class FoursquareClient implements Logic.onPlacesSearchProcessor {
               /// just skip one venue & continue loop
             }
           }
-          Log.d(LOG_TAG, "++++++++++HTTP++++++++++ got new [" + venueList.size() + "] venues");
+          Log.d(LOG_TAG, "Got new [" + venueList.size() + "] venues");
 
           if (null !=  mPlacesUpdateProcessor)
             mPlacesUpdateProcessor.placesUpdate(venueList);
@@ -89,7 +94,14 @@ public class FoursquareClient implements Logic.onPlacesSearchProcessor {
       @Override
       public void onFailure(Call<VenuesSearchResponse> call, Throwable t) {
         dialog.dismiss();
-        Log.w(LOG_TAG, "++++++++++HTTP++++++++++ Got FAILURE while getting venues search list: " + t.getMessage());
+        /// it's a network crash!
+        Informing.ServiceFailedDialogFragment sfDialogFragment =
+            Informing.ServiceFailedDialogFragment.newInstance(
+                R.string.dlgHTTPServiceFailedTitle,
+                R.string.dlgHTTPServiceFailedMessage,
+                R.drawable.ic_sync_problem_white_36dp);
+        sfDialogFragment.show(mFM, "dialog");
+        Log.w(LOG_TAG, "Got FAILURE while getting venues search list: " + t.getMessage());
       }
     });
   }

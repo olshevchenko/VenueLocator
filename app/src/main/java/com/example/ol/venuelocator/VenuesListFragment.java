@@ -14,7 +14,7 @@ import com.example.ol.venuelocator.venues.VenuesHelper;
 @SuppressWarnings("deprecation")
 
 /**
- * A fragment representing a list of Venues found.
+ * A fragment representing a list with venue headers
  */
 public class VenuesListFragment extends Fragment implements Logic.onPlacesRefreshHeadersProcessor {
   //for logging
@@ -32,7 +32,10 @@ public class VenuesListFragment extends Fragment implements Logic.onPlacesRefres
 
   private onVenueClickListener mListener;
   private int mVenueClickedNumber = -1;
-  private boolean mIsVenueClicked4Details = false;
+
+  public VenuesListFragment() {
+    setRetainInstance(true);
+  }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -40,7 +43,7 @@ public class VenuesListFragment extends Fragment implements Logic.onPlacesRefres
     Log.i(LOG_TAG, "onCreate()");
 
     if (savedInstanceState != null) {
-      mVenueClickedNumber = savedInstanceState.getInt(Constants.VenueClickParams.VENUE_CLICKED_NUMBER);
+      mVenueClickedNumber = savedInstanceState.getInt(Constants.SavedParams.VENUE_NUMBER);
     }
 
     mActivity = (MainActivity) getActivity();
@@ -63,7 +66,7 @@ public class VenuesListFragment extends Fragment implements Logic.onPlacesRefres
     View rootView = inflater.inflate(R.layout.fragment_venueslist, container, false);
     mLVVenuesList = (ListView) rootView.findViewById(R.id.lvVenuesList);
 
-    mVenuesListAdapter = new VenuesListAdapter(mActivity, mVHelper.getVenueList(), mActivity);
+    mVenuesListAdapter = new VenuesListAdapter(mActivity, mVHelper.getVenueList(), mListener);
     mLVVenuesList.setAdapter(mVenuesListAdapter);
 
     //restore list position
@@ -86,14 +89,13 @@ public class VenuesListFragment extends Fragment implements Logic.onPlacesRefres
   @Override
   public void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
-    outState.putInt(Constants.VenueClickParams.VENUE_CLICKED_NUMBER, mVenueClickedNumber);
+    outState.putInt(Constants.SavedParams.VENUE_NUMBER, mVenueClickedNumber);
   }
 
   @Override
   public void placesRefreshHeaders() {
-    Log.i(LOG_TAG, "placesRefreshHeaders()");
-
-    if (null != mVenuesListAdapter)
-      mVenuesListAdapter.notifyDataSetChanged();
+//    Log.i(LOG_TAG, "placesRefreshHeaders()");
+    mVenuesListAdapter.notifyDataSetChanged();
+    mLVVenuesList.setSelection(0);
   }
 }

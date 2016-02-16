@@ -8,6 +8,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
+/**
+ * describes Retrofit annotations for 'search' venues response & programming request for it
+ */
 public class FoursquareAPI {
   //for logging
   private static final String LOG_TAG = FoursquareAPI.class.getName();

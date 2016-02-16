@@ -17,15 +17,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * class for operation with Google Map instance object
  */
 public class MapClient implements Logic.onPlacesMapProcessor {
   //for logging
   private static final String LOG_TAG = MapClient.class.getName();
 
   private GoogleMap mGoogleMap;
-  private List<Marker> mMarkersList = new ArrayList<>(); ///markers made storage for further selective removal
-  Marker mSelected = null; ///marker made SELECTED
+  private List<Marker> mMarkersList; /// markers shown storage for further selective removal
+  int mSelected; /// ID of the marker made SELECTED
 
   /**
    * current GPS / network location data
@@ -33,40 +33,37 @@ public class MapClient implements Logic.onPlacesMapProcessor {
   private static LatLng mCurrentLatLng;
 
 
-  /// tune the map
   public MapClient(GoogleMap map) {
     mGoogleMap = map;
+    mMarkersList = new ArrayList<>();
+    mSelected = -1;
 
-    mGoogleMap.animateCamera(
-        CameraUpdateFactory.zoomTo(Constants.Locations.MAP_DEFAULT_ZOOM_LEVEL));
-
+    mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(Constants.Locations.MAP_DEFAULT_ZOOM_LEVEL));
     UiSettings uiSettings = mGoogleMap.getUiSettings();
     uiSettings.setCompassEnabled(true);
     uiSettings.setMapToolbarEnabled(true);
-//    uiSettings.setMyLocationButtonEnabled(true);
     uiSettings.setRotateGesturesEnabled(false);
     uiSettings.setTiltGesturesEnabled(false);
     uiSettings.setScrollGesturesEnabled(true);
     uiSettings.setZoomControlsEnabled(true);
     uiSettings.setZoomGesturesEnabled(true);
-
     mGoogleMap.setMyLocationEnabled(true);
   }
 
   /**
-   * makes map markers
+   * makes map markers from the venues
    *
    * @param venues2ShowList - list of places on the map for making markers from
    * @return true if succeeded
    */
   @Override
   public boolean placesShow(List<Venue> venues2ShowList) {
-    Log.i(LOG_TAG, "placesShow()");
+//    Log.i(LOG_TAG, "placesShow()");
 
     ///previously clear ALL marks and storage for them
     mGoogleMap.clear();
+    mSelected = -1;
     mMarkersList.clear();
-    mSelected = null;
 
     for (Venue venue: venues2ShowList) {
       LatLng markerPosition = new LatLng(venue.getLocation().getLtt(), venue.getLocation().getLng());
@@ -89,13 +86,13 @@ public class MapClient implements Logic.onPlacesMapProcessor {
   public boolean placeSelect(int position, Venue venue2Select) {
 
     /// 1'st, hide info & convert old selection back into normal marker form (if exists)
-    if (null != mSelected) {
-      mSelected.hideInfoWindow();
-      mSelected.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+    if (mSelected >= 0) {
+      mMarkersList.get(mSelected).hideInfoWindow();
+      mMarkersList.get(mSelected).setIcon(
+          BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
     }
 
     /// 2'nd, move maps camera
-
 /**
  * doesn't look as expected - leave it...
     /// try to combine our own location with the selected one
@@ -110,13 +107,14 @@ public class MapClient implements Logic.onPlacesMapProcessor {
             venue2Select.getLocation().getLng())));
 
     /// 3'rd, find the new selection in the existed markers list (by venues position)
-    mSelected = mMarkersList.get(position);
+    mSelected = position;
+    Marker mSelectedMarker = mMarkersList.get(position);
 
     /// and convert normal marker into selection view
-    mSelected.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-    mSelected.setTitle(venue2Select.getHeader().getName());
-    mSelected.setSnippet(venue2Select.getHeader().getPrimCategoryName());
-    mSelected.showInfoWindow();
+    mSelectedMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+    mSelectedMarker.setTitle(venue2Select.getHeader().getName());
+    mSelectedMarker.setSnippet(venue2Select.getHeader().getPrimCategoryName());
+    mSelectedMarker.showInfoWindow();
     return true;
   }
 
@@ -126,12 +124,17 @@ public class MapClient implements Logic.onPlacesMapProcessor {
     mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(location));
   }
 
+  public void exit() {
+    mGoogleMap.clear();
+    mMarkersList.clear();
+    mSelected = -1;
+  }
+
   /**
    * creates correct LatLngBounds from ANY corner of bounds rectangle
    * @param corner1
    * @param corner2
    * @return - bounds instance
-   */
   private LatLngBounds createCorrectLatLngBounds(LatLng corner1, LatLng corner2) {
     LatLng southwest = new LatLng(
         Math.min(corner1.latitude, corner2.latitude),
@@ -141,5 +144,6 @@ public class MapClient implements Logic.onPlacesMapProcessor {
         Math.max(corner1.longitude, corner2.longitude));
     return new LatLngBounds(southwest, northeast);
   }
+   */
 
 }

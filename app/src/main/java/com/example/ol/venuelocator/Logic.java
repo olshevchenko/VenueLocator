@@ -6,7 +6,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.List;
 
 /**
- * Created by ol on 06.02.16.
+ * superclass for operations abstract interfaces
  */
 public class Logic {
 
