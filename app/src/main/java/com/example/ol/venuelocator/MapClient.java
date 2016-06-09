@@ -24,17 +24,15 @@ public class MapClient implements Logic.onPlacesMapProcessor {
   private static final String LOG_TAG = MapClient.class.getName();
 
   private GoogleMap mGoogleMap;
+  private Logic.onLocationUpdateProcessor mLocationUpdateProcessor;
+  private Marker mMyLocationMarker = null; /// shows current (or manually selected) user location
   private List<Marker> mMarkersList; /// markers shown storage for further selective removal
   int mSelected; /// ID of the marker made SELECTED
 
-  /**
-   * current GPS / network location data
-   */
-  private static LatLng mCurrentLatLng;
 
-
-  public MapClient(GoogleMap map) {
+  public MapClient(GoogleMap map, Logic.onLocationUpdateProcessor locationUpdateProcessor) {
     mGoogleMap = map;
+    mLocationUpdateProcessor = locationUpdateProcessor;
     mMarkersList = new ArrayList<>();
     mSelected = -1;
 
@@ -47,7 +45,18 @@ public class MapClient implements Logic.onPlacesMapProcessor {
     uiSettings.setScrollGesturesEnabled(true);
     uiSettings.setZoomControlsEnabled(true);
     uiSettings.setZoomGesturesEnabled(true);
-    mGoogleMap.setMyLocationEnabled(true);
+//    mGoogleMap.setMyLocationEnabled(true);
+
+    /// process of manual position update via touch on the map
+    mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+      @Override
+      public void onMapClick(LatLng newLatLng) {
+        if (null != mLocationUpdateProcessor) {
+          /// move 'my location' marker, camera, request new venues, etc..
+          mLocationUpdateProcessor.locationUpdate(newLatLng);
+        }
+      }
+    });
   }
 
   /**
@@ -60,10 +69,12 @@ public class MapClient implements Logic.onPlacesMapProcessor {
   public boolean placesShow(List<Venue> venues2ShowList) {
 //    Log.i(LOG_TAG, "placesShow()");
 
-    ///previously clear ALL marks and storage for them
-    mGoogleMap.clear();
-    mSelected = -1;
+    ///previously clear all venues marks and storage for them
+    for (Marker marker : mMarkersList) {
+      marker.remove();
+    }
     mMarkersList.clear();
+    mSelected = -1;
 
     for (Venue venue: venues2ShowList) {
       LatLng markerPosition = new LatLng(venue.getLocation().getLtt(), venue.getLocation().getLng());
@@ -119,9 +130,17 @@ public class MapClient implements Logic.onPlacesMapProcessor {
   }
 
   @Override
-  public void positionMove(LatLng location) {
-    mCurrentLatLng = location;
-    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(location));
+  public void positionMove(LatLng toPosition) {
+    if (null == mMyLocationMarker) {
+      mMyLocationMarker = mGoogleMap.addMarker(
+          new MarkerOptions()
+              .position(toPosition)
+              .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_my_location_black_36dp)));
+    }
+    else { /// move existing one
+      mMyLocationMarker.setPosition(toPosition);
+    }
+    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(toPosition));
   }
 
   public void exit() {

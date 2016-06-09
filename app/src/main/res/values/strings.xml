@@ -39,6 +39,9 @@
     <string name="butPosLocationServiceFix">Open location services</string>
     <string name="butNegLocationServiceFix">Cancel</string>
 
+    <string name="tstLocationProviderDisabled">Location provider (%1$s) disabled"</string>
+    <string name="tstLocationProviderEnabled">Location provider (%1$s) enabled"</string>
+
     <!-- FoursquareClient -->
     <string name="dlgHTTPServiceFailedTitle">Network failed</string>
     <string name="dlgHTTPServiceFailedMessage">Unable to search venues. Check your network connection.</string>
@@ -46,6 +49,7 @@
     <!-- MapClient -->
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
         AIzaSyCzIlbrnmmXgCz71wIsnJM6S1QHv78fSkw </string>
+    <string name="tstMoveSuggestion">Change your physical position or click at the map to refresh venues..</string>
     <string name="dlgGettingAccess2GoogleMap">Getting access to Google Map...</string>
     <string name="bt1">Move!</string>
     <string name="bt2">Loc2</string>

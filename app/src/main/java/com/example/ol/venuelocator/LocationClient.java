@@ -59,7 +59,7 @@ public class LocationClient {
   /**
    * starts to define location both through GPS & networks
    */
-  public void getLocation() {
+  public void start() {
     if (null == mLocationManager) {
       Log.w(LOG_TAG, "LocationManager is down. Can not use positioning services.");
       return;
@@ -76,7 +76,7 @@ public class LocationClient {
   }
 
 
-  public void exit() {
+  public void stop() {
     mLocationManager.removeUpdates(locationListener);
   }
 
@@ -93,18 +93,16 @@ public class LocationClient {
 
       @Override
       public void onProviderDisabled(String provider) {
-        Toast toast = Toast.makeText(mContext,
-            "Location provider (" + provider + ") disabled",
-            Toast.LENGTH_SHORT);
+        String title = mContext.getString(R.string.tstLocationProviderDisabled, provider);
+        Toast toast = Toast.makeText(mContext, title, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
       }
 
       @Override
       public void onProviderEnabled(String provider) {
-        Toast toast = Toast.makeText(mContext,
-            "Location provider (" + provider + ") enabled",
-            Toast.LENGTH_SHORT);
+        String title = mContext.getString(R.string.tstLocationProviderEnabled, provider);
+        Toast toast = Toast.makeText(mContext, title, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
       }

@@ -13,10 +13,12 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.ol.venuelocator.venues.VenuesHelper;
 import com.google.android.gms.maps.model.LatLng;
@@ -39,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements
   /// global venues list holder
   private VenuesHelper mVHelper = null;
 
-  /// VenuesListFragment reference & pure interface reference on VenuesListFragment
+  /// pure interface reference on VenuesListFragment's method for show list of venues headers
   private Logic.onPlacesRefreshHeadersProcessor mPlacesRefreshHeadersProcessor = null;
 
   /// location client instance
@@ -177,12 +179,22 @@ public class MainActivity extends AppCompatActivity implements
   }
 
   @Override
+  protected void onResume() {
+    super.onResume();
+    if (null != mMapClient)
+      /// either we're after Cfg-change or onMapReady() is called already
+      mLocationClient.start(); /// start main logic based on location change detection
+    else
+      ; /// wait for onMapReady() executed
+  }
+
+  @Override
   public void onMapReady(GoogleMap googleMap) {
     mPleaseWaitDialog.dismiss();
-    mMapClient = new MapClient(googleMap); /// init & tune our map instance from the Google one
+    mMapClient = new MapClient(googleMap, this); /// init & tune our map instance from the Google one
     mPlacesMarkProcessor = mMapClient;
 
-    mLocationClient.getLocation(); /// start main logic based on location change detection
+    mLocationClient.start(); /// start main logic based on location change detection
   }
 
   @Override
@@ -192,12 +204,20 @@ public class MainActivity extends AppCompatActivity implements
   }
 
   @Override
+  protected void onPause() {
+    super.onPause();
+    mPleaseWaitDialog.dismiss();
+    mLocationClient.stop(); /// prevent location when non-focused
+  }
+
+  @Override
   protected void onDestroy() {
     super.onDestroy();
     if (isFinishing()) {
-      mLocationClient.exit();
-      mVHelper.clear();
-      mMapClient.exit();
+      if (null != mVHelper)
+        mVHelper.clear();
+      if (null != mMapClient)
+        mMapClient.exit();
     }
     else
       ; /// skip finalization in change orientation case (data will be needed soon)
@@ -228,19 +248,22 @@ public class MainActivity extends AppCompatActivity implements
 
   /**
    * process update location event - change map view position & request for new venues for it
-   * @param location - new location to process
+   * @param newLocation - new location to process
    */
   @Override
-  public void locationUpdate(LatLng location) {
-    mCurrentLatLng = location;
+  public void locationUpdate(LatLng newLocation) {
+    if (mCurrentLatLng == newLocation)
+      return; /// nothing to update (calls from, e.g., onPause() -> onResume())
+
+    mCurrentLatLng = newLocation;
 
     /// change map position
     if (null != mPlacesMarkProcessor)
-      mPlacesMarkProcessor.positionMove(location);
+      mPlacesMarkProcessor.positionMove(newLocation);
 
-    /// asynchronously call (Foursquare) venues search for current location
+    /// asynchronously call (Foursquare) venues search for new location
     if (null != mPlacesSearchProcessor)
-      mPlacesSearchProcessor.placesSearch(new Venue(location.latitude, location.longitude));
+      mPlacesSearchProcessor.placesSearch(new Venue(newLocation.latitude, newLocation.longitude));
     /// look at placesUpdate() below to view how to process placesSearch() results...
   }
 
@@ -257,6 +280,12 @@ public class MainActivity extends AppCompatActivity implements
       mPlacesRefreshHeadersProcessor.placesRefreshHeaders();
     if (null != mPlacesMarkProcessor)
       mPlacesMarkProcessor.placesShow(mVHelper.getVenueList());
+
+    /// show up suggestion
+    Toast toast = Toast.makeText(this, getString(R.string.tstMoveSuggestion),
+        Toast.LENGTH_SHORT);
+    toast.setGravity(Gravity.CENTER, 0, 0);
+    toast.show();
   }
 
   /**
