@@ -9,6 +9,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -55,16 +57,16 @@ public class MainActivity extends AppCompatActivity implements
   private FoursquareClient mHttpClient = null;
   private Logic.onPlacesSearchProcessor mPlacesSearchProcessor = null;
 
-  private ProgressDialog mPleaseWaitDialog;
+  private ProgressDialog mPleaseWaitDialog = null;
   private ActionBar mActionBar;
-  ///ToDo REMOVE it after debug!
-  private Button mBtLoc1;
 
   /// current SELECTED venue header index
   private int mVenueSelectedNumber = -1;
 
   /// current location data
   private static LatLng mCurrentLatLng = new LatLng(0, 0);
+  private static Location mCurrentLocationManual = new Location(LocationManager.GPS_PROVIDER);
+  private static Location mCurrentLocationAutomatic = new Location(LocationManager.GPS_PROVIDER);
 
 
   private static class CustomNonConfigurationInstance {
@@ -132,9 +134,6 @@ public class MainActivity extends AppCompatActivity implements
       this.mHttpClient = nonCfgInstance.getHttpClient();
     }
 
-    mBtLoc1 = (Button) findViewById(R.id.bt1);
-    mBtLoc1.setOnClickListener(this);
-
     /// get interface reference on the VenuesListFragment
     mPlacesRefreshHeadersProcessor = (VenuesListFragment) getSupportFragmentManager()
         .findFragmentById(R.id.frVenuesList);
@@ -190,7 +189,10 @@ public class MainActivity extends AppCompatActivity implements
 
   @Override
   public void onMapReady(GoogleMap googleMap) {
-    mPleaseWaitDialog.dismiss();
+    if (null != mPleaseWaitDialog) {
+      mPleaseWaitDialog.dismiss();
+      mPleaseWaitDialog = null;
+    }
     mMapClient = new MapClient(googleMap, this); /// init & tune our map instance from the Google one
     mPlacesMarkProcessor = mMapClient;
 
@@ -206,13 +208,20 @@ public class MainActivity extends AppCompatActivity implements
   @Override
   protected void onPause() {
     super.onPause();
-    mPleaseWaitDialog.dismiss();
+    if (null != mPleaseWaitDialog) {
+      mPleaseWaitDialog.dismiss();
+      mPleaseWaitDialog = null;
+    }
     mLocationClient.stop(); /// prevent location when non-focused
   }
 
   @Override
   protected void onDestroy() {
     super.onDestroy();
+    if (null != mPleaseWaitDialog) {
+      mPleaseWaitDialog.dismiss();
+      mPleaseWaitDialog = null;
+    }
     if (isFinishing()) {
       if (null != mVHelper)
         mVHelper.clear();
@@ -248,22 +257,44 @@ public class MainActivity extends AppCompatActivity implements
 
   /**
    * process update location event - change map view position & request for new venues for it
+   *
+   * IGNORES movement less than UPDATE_INTERVAL_DISTANCE threshold
+
    * @param newLocation - new location to process
+   * @param isManual - either location update from manual click on the map or real physical movement
    */
   @Override
-  public void locationUpdate(LatLng newLocation) {
-    if (mCurrentLatLng == newLocation)
-      return; /// nothing to update (calls from, e.g., onPause() -> onResume())
-
-    mCurrentLatLng = newLocation;
-
+  public void locationUpdate(Location newLocation, boolean isManual) {
+    if (isManual) {
+      /// (manual) location update by click on map
+      if (mCurrentLocationManual.distanceTo(newLocation) <
+          Constants.Locations.UPDATE_INTERVAL_DISTANCE) {
+        /// show up explanation
+        Toast toast = Toast.makeText(this, getString(R.string.tstMoveSuggestion),
+            Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+        return; /// just ignore jitter
+      }
+      else
+        mCurrentLocationManual = newLocation;
+    } else {
+      /// (automatic) location update by network | GPS
+      if (mCurrentLocationAutomatic.distanceTo(newLocation) < Constants.Locations.UPDATE_INTERVAL_DISTANCE)
+        return; /// just ignore jitter
+      else {
+        mCurrentLocationAutomatic = newLocation;
+      }
+    }
+    mCurrentLatLng = new LatLng(newLocation.getLatitude(), newLocation.getLongitude());
     /// change map position
     if (null != mPlacesMarkProcessor)
-      mPlacesMarkProcessor.positionMove(newLocation);
+      mPlacesMarkProcessor.positionMove(mCurrentLatLng);
 
     /// asynchronously call (Foursquare) venues search for new location
     if (null != mPlacesSearchProcessor)
-      mPlacesSearchProcessor.placesSearch(new Venue(newLocation.latitude, newLocation.longitude));
+      mPlacesSearchProcessor.placesSearch(new Venue(newLocation.getLatitude(),
+          newLocation.getLongitude()));
     /// look at placesUpdate() below to view how to process placesSearch() results...
   }
 
@@ -309,14 +340,6 @@ public class MainActivity extends AppCompatActivity implements
   @Override
   public void onClick(View v) {
     switch (v.getId()) {
-      case R.id.bt1:
-        /// ToDo DEBUG feature - REMOVE it later for release version
-        /// move to West-West-Nord (around Taganrog)
-        LatLng newLatLng = new LatLng(mCurrentLatLng.latitude + 0.001,
-            mCurrentLatLng.longitude - 0.0005);
-        Log.d(LOG_TAG, "DBG - falsely change location to " + mCurrentLatLng);
-        locationUpdate(newLatLng);
-        break;
       default:
         break;
     }

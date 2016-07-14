@@ -22,6 +22,7 @@ public class LocationClient {
   private Context mContext;
   private FragmentManager mFM;
   private LocationManager mLocationManager;
+  private boolean mIsStarted = false;
 
   /// venues update processor interface
   private Logic.onLocationUpdateProcessor mLocationUpdateProcessor = null;
@@ -65,6 +66,11 @@ public class LocationClient {
       return;
     }
 
+    if (mIsStarted)
+      return; /// prevent doubled request (at 1'st start - both from onMapReady() and onResume())
+
+    mIsStarted = true;
+
     mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
         Constants.Locations.UPDATE_INTERVAL_TIME,
         Constants.Locations.UPDATE_INTERVAL_DISTANCE,
@@ -77,6 +83,7 @@ public class LocationClient {
 
 
   public void stop() {
+    mIsStarted = false;
     mLocationManager.removeUpdates(locationListener);
   }
 
@@ -88,7 +95,7 @@ public class LocationClient {
 
       @Override
       public void onLocationChanged(Location location) {
-        mLocationUpdateProcessor.locationUpdate(new LatLng(location.getLatitude(), location.getLongitude()));
+        mLocationUpdateProcessor.locationUpdate(location, false);
       }
 
       @Override

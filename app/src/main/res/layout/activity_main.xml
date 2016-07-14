@@ -17,20 +17,6 @@
     <View
         style="@style/HDividerView"
         android:layout_height="10dp"/>
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/bt1"
-            android:text="@string/bt1"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone">
-        </Button>
-    </LinearLayout>
     <fragment
         android:id="@+id/frVenuesList"
         tools:layout="@layout/fragment_venueslist"

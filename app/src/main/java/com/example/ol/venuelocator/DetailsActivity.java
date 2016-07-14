@@ -27,6 +27,9 @@ public class DetailsActivity extends AppCompatActivity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_details);
+
+    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
     if (savedInstanceState != null)
       venueNumber = savedInstanceState.getInt(Constants.SavedParams.VENUE_NUMBER);
     else
@@ -85,6 +88,9 @@ public class DetailsActivity extends AppCompatActivity {
   public boolean onOptionsItemSelected(MenuItem item) {
     Intent intent;
     switch (item.getItemId()) {
+      case android.R.id.home:
+        finish();
+        return true;
       case R.id.action_about:
         intent = new Intent(this, AboutActivity.class);
         startActivity(intent);

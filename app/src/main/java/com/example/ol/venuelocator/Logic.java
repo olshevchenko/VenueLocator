@@ -1,5 +1,7 @@
 package com.example.ol.venuelocator;
 
+import android.location.Location;
+
 import com.example.ol.venuelocator.venues.Venue;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -42,12 +44,11 @@ public class Logic {
   }
 
   /**
-   * abstract interface to complete location (both network & GPS) update processing
+   * abstract interface to complete location update (network & GPS OR by manual click on map) processing
    */
   public interface onLocationUpdateProcessor {
-    void locationUpdate(LatLng location);
+    void locationUpdate(Location newLocation, boolean isManual);
   }
-
 }
 
 

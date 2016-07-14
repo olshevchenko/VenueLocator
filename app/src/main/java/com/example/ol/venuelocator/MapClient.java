@@ -1,6 +1,8 @@
 package com.example.ol.venuelocator;
 
 
+import android.location.Location;
+import android.location.LocationManager;
 import android.util.Log;
 
 import com.example.ol.venuelocator.venues.Venue;
@@ -53,7 +55,10 @@ public class MapClient implements Logic.onPlacesMapProcessor {
       public void onMapClick(LatLng newLatLng) {
         if (null != mLocationUpdateProcessor) {
           /// move 'my location' marker, camera, request new venues, etc..
-          mLocationUpdateProcessor.locationUpdate(newLatLng);
+          Location newLoc = new Location(LocationManager.GPS_PROVIDER);
+          newLoc.setLatitude(newLatLng.latitude);
+          newLoc.setLongitude(newLatLng.longitude);
+          mLocationUpdateProcessor.locationUpdate(newLoc, true);
         }
       }
     });

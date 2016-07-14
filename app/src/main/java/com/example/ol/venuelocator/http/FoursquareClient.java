@@ -1,5 +1,6 @@
 package com.example.ol.venuelocator.http;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.support.v4.app.FragmentManager;
@@ -48,7 +49,9 @@ public class FoursquareClient implements Logic.onPlacesSearchProcessor {
   }
 
   public void placesSearch(Venue currPosition) {
-    VenuesSearchResponse resultResponse = null;
+
+    if (((Activity) mContext).isFinishing())
+      return;
 
     mApiParams.setLocation(currPosition.getLocation().getLtt(), currPosition.getLocation().getLng());
 
@@ -62,6 +65,9 @@ public class FoursquareClient implements Logic.onPlacesSearchProcessor {
     call.enqueue(new Callback<VenuesSearchResponse>() {
       @Override
       public void onResponse(Call<VenuesSearchResponse> call, Response<VenuesSearchResponse> response) {
+        if (((Activity) mContext).isFinishing())
+          return;
+
         dialog.dismiss();
         if (response.isSuccess()) {
           /// request successful (status code 200, 201)

@@ -20,8 +20,10 @@
         Here is a small venues locator application. It locates your position
         (both via GPS or network services) and prepares nearest venue points
         requesting Foursquare server.\n
-        The resulting venues are displayed as map markers and as a list of
-        venues header info.\n
+        Also, You can tap on the map to show local venue points independently
+        of your physical location.
+        The resulting venues are displayed as a list of venues header info
+        with corresponding markers at the map.\n
         You can click on the header to view corresponding map closer, or click
         arrow → to get additional information about the venue.
     </string>
@@ -49,7 +51,8 @@
     <!-- MapClient -->
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
         AIzaSyCzIlbrnmmXgCz71wIsnJM6S1QHv78fSkw </string>
-    <string name="tstMoveSuggestion">Change your physical position or click at the map to refresh venues..</string>
+    <string name="tstTapIgnoringExplanation">Your tap position is too close to your current location.</string>
+    <string name="tstMoveSuggestion">Change your physical position or tap at the map to refresh venues..</string>
     <string name="dlgGettingAccess2GoogleMap">Getting access to Google Map...</string>
     <string name="bt1">Move!</string>
     <string name="bt2">Loc2</string>
