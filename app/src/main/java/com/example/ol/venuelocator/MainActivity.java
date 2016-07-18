@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements
     /// check for exit return from child Details activity
     if (getIntent().getBooleanExtra("EXIT", false)) {
       finish();
+      return;
     }
 
     /// check if Google Play services is available
@@ -120,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements
               R.drawable.ic_error_white_36dp);
       sfDialogFragment.show(getSupportFragmentManager(), "dialog");
       finish();
+      return;
     }
 
     setContentView(R.layout.activity_main);
@@ -270,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements
       if (mCurrentLocationManual.distanceTo(newLocation) <
           Constants.Locations.UPDATE_INTERVAL_DISTANCE) {
         /// show up explanation
-        Toast toast = Toast.makeText(this, getString(R.string.tstMoveSuggestion),
+        Toast toast = Toast.makeText(this, getString(R.string.tstTapIgnoringExplanation),
             Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();

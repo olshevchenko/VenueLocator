@@ -49,8 +49,6 @@
     <string name="dlgHTTPServiceFailedMessage">Unable to search venues. Check your network connection.</string>
 
     <!-- MapClient -->
-    <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
-        AIzaSyCzIlbrnmmXgCz71wIsnJM6S1QHv78fSkw </string>
     <string name="tstTapIgnoringExplanation">Your tap position is too close to your current location.</string>
     <string name="tstMoveSuggestion">Change your physical position or tap at the map to refresh venues..</string>
     <string name="dlgGettingAccess2GoogleMap">Getting access to Google Map...</string>
